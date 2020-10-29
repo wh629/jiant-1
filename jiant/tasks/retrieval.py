@@ -70,6 +70,7 @@ from jiant.tasks.lib.xquad import XquadTask
 from jiant.tasks.lib.mcscript import MCScriptTask
 from jiant.tasks.lib.arct import ArctTask
 from jiant.tasks.lib.piqa import PiqaTask
+from jiant.tasks.lib.mnli_hypothesisonly import MnliHypTask
 
 from jiant.tasks.core import Task
 from jiant.utils.python.io import read_json
@@ -145,6 +146,7 @@ TASK_DICT = {
     "mcscript": MCScriptTask,
     "arct": ArctTask,
     "piqa": PiqaTask,
+    "mnli_hyp": MnliHypTask,
 }
 
 
