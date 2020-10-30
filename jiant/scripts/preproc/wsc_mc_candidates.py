@@ -74,7 +74,7 @@ def process_wsc_candidates(args):
 
         # replace pronoun with '_'
         pron_start, pron_end = new_example["pronoun_char_span"]
-        new_example["new_text"] = new_example["text"][:pron_start] + '_' + new_example["text"][pron_end+1:]
+        new_example["new_text"] = new_example["text"][:pron_start] + '_' + new_example["text"][pron_end:]
 
         # remove duplicate candidates
         new_example["cand_text_list"] = list(set(new_example["cand_text_list"]))
