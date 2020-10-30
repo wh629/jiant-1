@@ -127,7 +127,7 @@ def process_wsc_candidates(args):
 def main():
     parser = argparse.ArgumentParser()
     # === Required parameters === #
-    parser.add_argumet('--task_config', type=str, required=True, help='original task config dict')
+    parser.add_argument('--task_config', type=str, required=True, help='original task config dict')
 
     # === Optional parameters === #
     parser.add_argument('--task_name', type=str, default="wsc", help='name of task')
