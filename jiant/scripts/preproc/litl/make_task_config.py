@@ -8,7 +8,8 @@ import jiant.utils.zconf as zconf
 
 @zconf.run_config
 class RunConfiguration(zconf.RunConfig):
-    data_path = zconf.attr(type=str)
+    data_path = zconf.attr(type=str, required=True)
+    itereval_path = zconf.attr(type=str, required=True)
 
     # Optional
     hypothesis = zconf.attr(action='store_true')
@@ -42,6 +43,19 @@ def create_task_config(args):
         },
         path=os.path.join(config_dir, f'{config_name}_config.json'),
     )
+
+    if not args.hypothesis:
+        py_io.write_json(
+            data={
+                "task": "mnli" if args.task_name == '' else args.task_name,
+                "paths": {
+                    "train": paths["train"],
+                    "val": args.itereval_path
+                },
+                "name": "mnli",
+            },
+            path=os.path.join(config_dir, f'eval_{config_name}_config.json'),
+        )
 
 
 def main():
