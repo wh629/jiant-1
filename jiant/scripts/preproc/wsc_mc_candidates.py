@@ -1,5 +1,6 @@
 import os
 import pickle
+import argparse
 import json
 import jiant.utils.zconf as zconf
 from jiant.scripts.preproc.fairseq_wsc.wsc_utils import (
@@ -11,15 +12,6 @@ from jiant.scripts.preproc.fairseq_wsc.wsc_utils import (
 from jiant.utils.python.io import read_json_lines, read_json
 import torch
 import pandas as pd
-
-
-@zconf.run_config
-class RunConfiguration(zconf.RunConfig):
-    # === Required parameters === #
-    task_config = zconf.attr(type=str, required=True)
-
-    # === Optional parameters === #
-    task_name = zconf.attr(type=str, default="wsc")
 
 
 def strip_punc(x):
@@ -133,8 +125,14 @@ def process_wsc_candidates(args):
 
 
 def main():
-    mode, cl_args = zconf.get_mode_and_cl_args()
-    args = RunConfiguration.default_run_cli(cl_args=cl_args)
+    parser = argparse.ArgumentParser()
+    # === Required parameters === #
+    parser.add_argumet('--task_config', type=str, required=True, help='original task config dict')
+
+    # === Optional parameters === #
+    parser.add_argument('--task_name', type=str, default="wsc", help='name of task')
+
+    args = parser.parse_args()
 
     process_wsc_candidates(args)
 
