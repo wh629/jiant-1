@@ -4,6 +4,7 @@ import pandas as pd
 
 from jiant.tasks.lib.templates.shared import labels_to_bimap
 from jiant.tasks.lib.templates import multiple_choice as mc_template
+from jiant.utils.python.io import read_json_lines
 
 
 @dataclass
@@ -39,42 +40,44 @@ class WSCMCTask(mc_template.AbstractMultipleChoiceTask):
     NUM_CHOICES = len(CHOICE_KEYS)
 
     def get_train_examples(self):
-        return self._create_examples(self.train_path, set_type="train")
+        return self._create_examples(self.train_path, self.path_dict["train_max_cand"], set_type="train")
 
     def get_val_examples(self):
-        return self._create_examples(self.val_path, set_type="val")
+        return self._create_examples(self.val_path, self.path_dict["val_max_cand"], set_type="val")
 
     def get_test_examples(self):
-        return self._create_examples(self.test_path, set_type="test")
+        return self._create_examples(self.test_path, self.path_dict["test_max_cand"], set_type="test")
 
     @classmethod
-    def _create_examples(cls, path, set_type):
-        df_names = [
-            "#id",
-            "warrant0",
-            "warrant1",
-            "gold_label",
-            "reason",
-            "claim",
-            "debateTitle",
-            "debateInfo",
-        ]
-
-        df = pd.read_csv(path, sep="\t", header=0, names=df_names,)
-        choice_pre = "And since "
+    def _create_examples(cls, path, max_cand, set_type):
+        lines = read_json_lines(path)
         examples = []
 
-        for i, row in enumerate(df.itertuples()):
-            # Repo explanation from https://github.com/UKPLab/argument-reasoning-comprehension-task
+        for line in lines:
+            if set_type == "train" and line['label'] == False:
+                continue
+
+            pron_pre, pron_post = line['new_text'].split('_')
+            mined_choices = [line['query_text']]+line['cand_text_list']
+            choice_list = [cand + pron_post for cand in mined_choices]
+
+            # pad with dummy candidates
+            for _ in range(max_cand-len(mined_choices)):
+                choice_list.append('.' + pron_post)
+
+            if set_type == 'train':
+                label = 0
+            elif set_type == 'val':
+                label = int(line['label'])
+            else:
+                label = cls.CHOICE_KEYS[-1]
+
             examples.append(
                 Example(
-                    guid="%s-%s" % (set_type, i),
-                    prompt=row.reason + " ",
-                    choice_list=[
-                        choice_pre + row.warrant0 + ", " + row.claim,
-                        choice_pre + row.warrant1 + ", " + row.claim,
-                    ],
-                    label=row.gold_label if set_type != "test" else cls.CHOICE_KEYS[-1],
+                    guid=line['uid'],
+                    prompt=pron_pre,
+                    choice_list=choice_list,
+                    label=label,
                 )
             )
 
