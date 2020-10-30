@@ -79,7 +79,7 @@ def process_wsc_candidates(args):
         # clean up examples and mine candidates
         expanded_examples = list(map(convert_wsc_example, examples))
 
-        with open(os.path.join(data_dir, f'{split}_expanded.jsonl'), w) as f:
+        with open(os.path.join(data_dir, f'{split}_expanded.jsonl'), 'w') as f:
             for example in expanded_examples:
                 f.write(f'{json.dumps(example)}\n')
 
