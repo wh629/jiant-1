@@ -88,11 +88,8 @@ def process_wsc_candidates(args):
 
         # clean up examples and mine candidates
         expanded_examples = list(map(convert_wsc_example, examples))
-
-        longest = 0
-        for example in expanded_examples:
-            if len(example['cand_text_list']) + 1 > longest:
-                longest = len(example['cand_text_list']) + 1
+        cand_lengths = list(map(lambda x: len(x['cand_text_list']), expanded_examples))
+        longest = max(cand_lengths)+1
 
         split_path = os.path.join(data_dir, f'{split}_expanded.jsonl')
         write_jsonl(
@@ -104,7 +101,7 @@ def process_wsc_candidates(args):
     expanded_paths['max_candidates'] = longest
 
     # write new config
-    expanded_config = {key: value for key, value in task_config}
+    expanded_config = {key: value for key, value in task_config.items()}
     expanded_config["paths"] = expanded_paths
     write_json(
         data=expanded_config,
