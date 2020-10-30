@@ -9,7 +9,7 @@ from jiant.scripts.preproc.fairseq_wsc.wsc_utils import (
     get_detokenizer,
     get_spacy_nlp,
 )
-from jiant.utils.python.io import read_json_lines, read_json
+from jiant.utils.python.io import read_json_lines, read_json, write_json, write_jsonl
 import torch
 import pandas as pd
 
@@ -70,58 +70,40 @@ def process_wsc_candidates(args):
         ]
 
         if split != "test":
-            new_example["p_label"] = example["label"]
+            new_example["label"] = example["label"]
+
+        # replace pronoun with '_'
+        pron_start, pron_end = new_example["pronoun_char_span"]
+        new_example["new_text"] = new_example["text"][:pron_start] + '_' + new_example["text"][pron_end+1:]
+
+        # remove duplicate candidates
+        new_example["cand_text_list"] = list(set(new_example["cand_text_list"]))
+
         return new_example
 
+    # write new examples
+    expanded_paths = {}
     for split, filename in paths_dict.items():
         examples = read_json_lines(filename)
 
         # clean up examples and mine candidates
         expanded_examples = list(map(convert_wsc_example, examples))
 
-        with open(os.path.join(data_dir, f'{split}_expanded.jsonl'), 'w') as f:
-            for example in expanded_examples:
-                f.write(f'{json.dumps(example)}\n')
+        split_path = os.path.join(data_dir, f'{split}_expanded.jsonl')
+        write_jsonl(
+            data=expanded_examples,
+            path=split_path
+        )
 
-        # # cross example process
-        # global_ans_dict = {}
-        # for idx, example in enumerate(examples):
-        #     key = (example["text"], example["pronoun_text"])
-        #     if key not in global_ans_dict:
-        #         global_ans_dict[key] = {"correct_query": None, "idxs": [], "all_cands": []}
-        #     global_ans_dict[key]["idxs"].append(idx)
-        #     global_ans_dict[key]["all_cands"].append(example["query_text"])
-        #     if example.get("p_label", False):
-        #         global_ans_dict[key]["correct_query"] = example["query_text"]
-        #
-        # for example_group in global_ans_dict.values():
-        #     correct_query = example_group["correct_query"]
-        #     for idx in example_group["idxs"]:
-        #         example = examples[idx]
-        #         # if candidates_source == "cross":
-        #         #     example["cand_text_list"] = [
-        #         #         cand
-        #         #         for cand in example_group["all_cands"]
-        #         #         if cand != example["query_text"]
-        #         #     ]
-        #         example["cand_text_list"] = list(set(example["cand_text_list"]))
-        #         if split == "train":
-        #             if correct_query is not None:
-        #                 query_and_cands = [example["query_text"]] + example["cand_text_list"]
-        #                 try:
-        #                     example["mc_label"] = query_and_cands.index(correct_query)
-        #                 except ValueError:
-        #                     example["cand_text_list"].insert(0, correct_query)
-        #                     example["mc_label"] = 1
-        #             else:
-        #                 example["mc_label"] = -1
-        # return examples
+        expanded_paths[split] = split_path
 
-        # self.raw_data = {
-        #     "train": load_wsc_split(os.path.join(self.data_dir, "WSC", "train.jsonl"), "train"),
-        #     "val": load_wsc_split(os.path.join(self.data_dir, "WSC", "val.jsonl"), "val"),
-        #     "test": load_wsc_split(os.path.join(self.data_dir, "WSC", "test.jsonl"), "test"),
-        # }
+    # write new config
+    expanded_config = {key: value for key, value in task_config}
+    expanded_config["paths"] = expanded_paths
+    write_json(
+        data=expanded_config,
+        path=os.path.join(config_dir, f'{args.task_name}_mc_config.json')
+    )
 
 
 def main():
