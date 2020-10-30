@@ -86,6 +86,25 @@ class ConcatenateLogitsAccumulator(BaseAccumulator):
         return all_logits
 
 
+class WSCMultipleChoiceLogitsAccumulator(ConcatenateLogitsAccumulator):
+    def __init__(self):
+        self.logits_list = []
+        self.guid_list = []
+        self.query_list = []
+
+    def update(self, batch_logits, batch_loss, batch, batch_metadata):
+        self.logits_list.append(batch_logits)
+        batch_guid = batch_metadata.get("guid")
+        if batch_guid is not None:
+            self.guid_list.append(batch_guid)
+            # Query index should be last element of guid
+            self.query_list.append([guid.split('_')[-1] for guid in batch_guid])
+
+    def get_queries(self):
+        all_queries = np.concatenate(self.query_list)
+        return all_queries
+
+
 class ConcatenateLossAccumulator(BaseAccumulator):
     def __init__(self):
         self.loss_list = []
@@ -907,6 +926,17 @@ class Bucc2018EvaluationScheme(BaseEvaluationScheme):
         return Metrics(major=result["F1"], minor=result,)
 
 
+class WSCMultipleChoiceEvaluationScheme(MultipleChoiceAccuracyEvaluationScheme):
+    def get_accumulator(self):
+        return WSCMultipleChoiceLogitsAccumulator()
+
+    @classmethod
+    def get_preds_from_accumulator(cls, task, accumulator):
+        logits = accumulator.get_accumulated()
+        queries = accumulator.get_queries()
+        return np.equal(np.argmax(logits, axis=1), queries)
+
+
 def get_evaluation_scheme_for_task(task) -> BaseEvaluationScheme:
     # TODO: move logic to task?  (issue #1182)
     if isinstance(
@@ -1000,6 +1030,8 @@ def get_evaluation_scheme_for_task(task) -> BaseEvaluationScheme:
         return Bucc2018EvaluationScheme()
     elif isinstance(task, tasks.TatoebaTask):
         return TatoebaEvaluationScheme()
+    elif isinstance(task, tasks.WSCMCTask):
+        return WSCMultipleChoiceEvaluationScheme()
     else:
         raise KeyError(task)
 
