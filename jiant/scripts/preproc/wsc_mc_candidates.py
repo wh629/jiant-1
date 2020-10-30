@@ -98,7 +98,7 @@ def process_wsc_candidates(args):
         )
 
         expanded_paths[split] = split_path
-    expanded_paths['max_candidates'] = longest
+        expanded_paths[f'{split}_max_cand'] = longest
 
     # write new config
     expanded_config = {key: value for key, value in task_config.items()}
