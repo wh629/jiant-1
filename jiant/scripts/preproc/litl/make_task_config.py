@@ -29,7 +29,8 @@ def create_task_config(args):
         split = file.split('_')[0]
         paths[split] = os.path.join(args.data_path, file)
 
-    config_dir = os.path.join('.', 'tasks', 'configs') if args.config_dir == '' else args.config_dir
+    tasks_dir = os.path.dirname(os.path.dirname(args.data_path))
+    config_dir = os.path.join(tasks_dir, 'configs') if args.config_dir == '' else args.config_dir
     os.makedirs(config_dir, exist_ok=True)
 
     config_name = os.path.basename(args.data_path) if args.config_name == '' else args.config_name
