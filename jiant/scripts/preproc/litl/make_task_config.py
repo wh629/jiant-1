@@ -3,19 +3,7 @@ import os
 import tqdm
 
 import jiant.utils.python.io as py_io
-import jiant.utils.zconf as zconf
-
-
-@zconf.run_config
-class RunConfiguration(zconf.RunConfig):
-    data_path = zconf.attr(type=str, required=True)
-    itereval_path = zconf.attr(type=str, required=True)
-
-    # Optional
-    hypothesis = zconf.attr(action='store_true')
-    config_dir = zconf.attr(type=str, default='')
-    config_name = zconf.attr(type=str, default='')
-    task_name = zconf.attr(type=str, default='')
+import argparse
 
 
 def create_task_config(args):
@@ -35,6 +23,8 @@ def create_task_config(args):
 
     config_name = os.path.basename(args.data_path) if args.config_name == '' else args.config_name
     config_name = config_name + "_hyp" if args.hypothesis else config_name
+
+    print(config_name)
 
     py_io.write_json(
         data={
@@ -60,7 +50,18 @@ def create_task_config(args):
 
 
 def main():
-    args = RunConfiguration.default_run_cli()
+    parser = argparse.ArgumentParser()
+    # Required arguments
+    parser.add_argument('--data_path', type=str, required=True)
+    parser.add_argument('--itereval_path', type=str, required=True)
+
+    # Optional
+    parser.add_argument('--hypothesis', action='store_true')
+    parser.add_argument('--config_dir', type=str, default='')
+    parser.add_argument('--config_name', type=str, default='')
+    parser.add_argument('--task_name', type=str, default='')
+
+    args = parser.parse_args()
     create_task_config(args)
 
 
