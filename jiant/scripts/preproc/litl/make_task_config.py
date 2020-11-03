@@ -1,6 +1,4 @@
-import csv
 import os
-import tqdm
 
 import jiant.utils.python.io as py_io
 import argparse
