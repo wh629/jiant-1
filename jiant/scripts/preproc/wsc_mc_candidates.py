@@ -103,6 +103,7 @@ def process_wsc_candidates(args):
     # write new config
     expanded_config = {key: value for key, value in task_config.items()}
     expanded_config["paths"] = expanded_paths
+    expanded_config["task"] = "wsc_mc"
     write_json(
         data=expanded_config,
         path=os.path.join(config_dir, f'{args.task_name}_mc_config.json')
