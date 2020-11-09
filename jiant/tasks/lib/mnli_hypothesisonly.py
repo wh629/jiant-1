@@ -38,7 +38,7 @@ class TokenizedExample(BaseTokenizedExample):
     def featurize(self, tokenizer, feat_spec):
         return single_sentence_featurize(
             guid=self.guid,
-            input_tokens_b=self.hypothesis,
+            input_tokens=self.hypothesis,
             label_id=self.label_id,
             tokenizer=tokenizer,
             feat_spec=feat_spec,
