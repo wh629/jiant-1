@@ -26,9 +26,9 @@ def create_task_config(args):
 
     py_io.write_json(
         data={
-            "task": "mnli" if args.task_name == '' else args.task_name,
+            "task": "mnli_hyp" if args.hypothesis else "mnli",
             "paths": paths,
-            "name": "mnli_hyp" if args.hypothesis else "mnli",
+            "name": "mnli" if args.task_name == '' else args.task_name,
         },
         path=os.path.join(config_dir, f'{config_name}_config.json'),
     )
