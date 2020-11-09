@@ -28,7 +28,7 @@ def create_task_config(args):
         data={
             "task": "mnli_hyp" if args.hypothesis else "mnli",
             "paths": paths,
-            "name": "mnli" if args.task_name == '' else args.task_name,
+            "name": "mnli_hyp" if args.hypothesis else "mnli",
         },
         path=os.path.join(config_dir, f'{config_name}_config.json'),
     )
