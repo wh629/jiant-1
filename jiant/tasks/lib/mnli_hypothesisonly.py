@@ -18,7 +18,6 @@ from jiant.utils.python.io import read_jsonl
 @dataclass
 class Example(BaseExample):
     guid: str
-    premise: str
     hypothesis: str
     label: str
 
