@@ -36,7 +36,7 @@ def create_cross_config(args):
             val_config = configs[f'{val}_{args.round}']
 
             config_name = f'{training}-{val}_{args.round}'
-            config_name = os.path.basename(args.data_base, config_name) if args.config_name == '' else args.config_name
+            config_name = os.path.join(args.data_base, config_name) if args.config_name == '' else args.config_name
             config_name = config_name + "_hyp" if args.hypothesis else config_name
 
             py_io.write_json(
