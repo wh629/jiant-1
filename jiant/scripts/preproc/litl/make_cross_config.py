@@ -30,7 +30,7 @@ def create_cross_config(args):
 
     for training, train_config in configs.items():
         for val in treatments:
-            if val in training:
+            if args.debug and val in training:
                 continue
 
             val_config = configs[f'{val}_{args.round}']
@@ -63,6 +63,7 @@ def main():
     parser.add_argument('--config_dir', type=str, default='')
     parser.add_argument('--config_name', type=str, default='')
     parser.add_argument('--task_name', type=str, default='')
+    parser.add_argument('--debug', action='store_false')
 
     args = parser.parse_args()
     create_cross_config(args)
