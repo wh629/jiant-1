@@ -24,7 +24,7 @@ def create_cross_config(args):
             itereval=True,
         )
 
-    tasks_dir = os.path.dirname(os.path.dirname(args.data_path))
+    tasks_dir = os.path.dirname(args.data_base)
     config_dir = os.path.join(tasks_dir, 'configs') if args.config_dir == '' else args.config_dir
     os.makedirs(config_dir, exist_ok=True)
 
@@ -35,8 +35,7 @@ def create_cross_config(args):
 
             val_config = configs[f'{val}_{args.round}']
 
-            config_name = f'{training}-{val}_{args.round}'
-            config_name = os.path.join(args.data_base, config_name) if args.config_name == '' else args.config_name
+            config_name = f'{training}-{val}_{args.round}' if args.config_name == '' else args.config_name
             config_name = config_name + "_hyp" if args.hypothesis else config_name
 
             py_io.write_json(
