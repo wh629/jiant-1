@@ -4,7 +4,10 @@ import jiant.utils.python.io as py_io
 import argparse
 
 
-def create_task_config(args):
+def create_task_config(args, write=True, data_path=None, itereval=True):
+    if not data_path is None:
+        args.data_path = data_path
+
     files = []
     for (dirpath, dirnames, filenames) in os.walk(args.data_path):
         files.extend(filenames)
@@ -24,27 +27,34 @@ def create_task_config(args):
 
     print(config_name)
 
-    py_io.write_json(
-        data={
-            "task": "mnli_hyp" if args.hypothesis else "mnli",
-            "paths": paths,
-            "name": "mnli_hyp" if args.hypothesis else "mnli",
-        },
-        path=os.path.join(config_dir, f'{config_name}_config.json'),
-    )
-
-    if not args.hypothesis:
+    if write:
         py_io.write_json(
             data={
-                "task": "mnli" if args.task_name == '' else args.task_name,
-                "paths": {
-                    "train": paths["train"],
-                    "val": args.itereval_path
-                },
-                "name": "mnli",
+                "task": "mnli_hyp" if args.hypothesis else "mnli",
+                "paths": paths,
+                "name": "mnli_hyp" if args.hypothesis else "mnli",
             },
-            path=os.path.join(config_dir, f'eval_{config_name}_config.json'),
+            path=os.path.join(config_dir, f'{config_name}_config.json'),
         )
+
+        if not args.hypothesis and itereval:
+            py_io.write_json(
+                data={
+                    "task": "mnli" if args.task_name == '' else args.task_name,
+                    "paths": {
+                        "train": paths["train"],
+                        "val": args.itereval_path
+                    },
+                    "name": "mnli",
+                },
+                path=os.path.join(config_dir, f'eval_{config_name}_config.json'),
+            )
+    else:
+        return {
+                "task": "mnli_hyp" if args.hypothesis else "mnli",
+                "paths": paths,
+                "name": "mnli_hyp" if args.hypothesis else "mnli",
+            }
 
 
 def main():
