@@ -73,7 +73,7 @@ class ConcatenateLogitsAccumulator(BaseAccumulator):
         self.logits_list.append(batch_logits)
         batch_guid = batch_metadata.get("guid")
         if batch_guid is not None:
-            self.guid_list.extend(batch_guid)
+            self.guid_list.append(batch_guid)
 
     def get_guids(self):
         if self.guid_list:
@@ -266,7 +266,7 @@ class MCTACOEvaluationScheme(BaseLogitsEvaluationScheme):
     def get_preds_from_accumulator(self, task, accumulator):
         logits = accumulator.get_accumulated()
         pred = np.argmax(logits, axis=1)
-        guid = accumulator.guid_list
+        guid = accumulator.get_guids()
         return guid, pred
 
     @classmethod
@@ -540,7 +540,7 @@ class ReCordEvaluationScheme(BaseEvaluationScheme):
         predictions_dict = {}
 
         preds = cls.get_preds_from_accumulator(task, accumulator)
-        guid_list = guid_list = accumulator.get_guids()
+        guid_list = accumulator.get_guids()
         gold_label_list_of_sets = accumulator.get_gold_label_list()
 
         question_ids = []
@@ -959,6 +959,7 @@ def get_evaluation_scheme_for_task(task) -> BaseEvaluationScheme:
             tasks.AcceptabilityDefinitenessTask,
             tasks.BoolQTask,
             tasks.CopaTask,
+            tasks.FeverNliTask,
             tasks.MnliTask,
             tasks.PawsXTask,
             tasks.QnliTask,
@@ -997,7 +998,9 @@ def get_evaluation_scheme_for_task(task) -> BaseEvaluationScheme:
             tasks.HellaSwagTask,
             tasks.MutualTask,
             tasks.MutualPlusTask,
+            tasks.QuailTask,
             tasks.SocialIQATask,
+            tasks.WinograndeTask,
             tasks.MCTestTask,
         ),
     ):
