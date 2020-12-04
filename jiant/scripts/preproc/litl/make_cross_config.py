@@ -15,7 +15,7 @@ def create_cross_config(args):
             write=False,
             data_path=os.path.join(args.data_base, f'{treatment}_{args.round}'),
             itereval=True,
-            anlieval=False,
+            mnlieval=False,
         )
 
         configs[f'{treatment}_{args.round}_separate'] = create_task_config(
@@ -23,7 +23,7 @@ def create_cross_config(args):
             write=False,
             data_path=os.path.join(args.data_base, f'{treatment}_{args.round}_separate'),
             itereval=True,
-            anlieval=False,
+            mnlieval=False,
         )
 
     tasks_dir = os.path.dirname(args.data_base)

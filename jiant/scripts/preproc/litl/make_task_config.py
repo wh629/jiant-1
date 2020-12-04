@@ -4,7 +4,7 @@ import jiant.utils.python.io as py_io
 import argparse
 
 
-def create_task_config(args, write=True, data_path=None, itereval=True, anlieval=True):
+def create_task_config(args, write=True, data_path=None, itereval=True, mnlieval=True):
     if not data_path is None:
         args.data_path = data_path
 
@@ -50,17 +50,17 @@ def create_task_config(args, write=True, data_path=None, itereval=True, anlieval
                     },
                     path=os.path.join(config_dir, f'eval_{config_name}_config.json'),
                 )
-            if anlieval:
+            if mnlieval:
                 py_io.write_json(
                     data={
                         "task": "mnli" if args.task_name == '' else args.task_name,
                         "paths": {
                             "train": paths["train"],
-                            "val": args.anlieval_path
+                            "val": args.mnlieval_path
                         },
                         "name": "mnli",
                     },
-                    path=os.path.join(config_dir, f'anlieval_{config_name}_config.json'),
+                    path=os.path.join(config_dir, f'mnlieval_{config_name}_config.json'),
                 )
     else:
         return {
@@ -75,7 +75,7 @@ def main():
     # Required arguments
     parser.add_argument('--data_path', type=str, required=True)
     parser.add_argument('--itereval_path', type=str, required=True)
-    parser.add_argument('--anlieval_path', type=str, required=True)
+    parser.add_argument('--mnlieval_path', type=str, required=True)
 
     # Optional
     parser.add_argument('--hypothesis', action='store_true')
