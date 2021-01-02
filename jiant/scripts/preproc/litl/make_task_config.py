@@ -37,8 +37,8 @@ def create_task_config(args, write=True, data_path=None, itereval=True, mnlieval
             path=os.path.join(config_dir, f'{config_name}_config.json'),
         )
 
-        if not args.hypothesis and args.itereval_path != '':
-            if itereval:
+        if not args.hypothesis:
+            if itereval and args.itereval_path != '':
                 py_io.write_json(
                     data={
                         "task": "mnli" if args.task_name == '' else args.task_name,
