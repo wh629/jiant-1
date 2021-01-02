@@ -4,7 +4,7 @@ import jiant.utils.python.io as py_io
 import argparse
 
 
-def create_task_config(args, write=True, data_path=None, itereval=True, mnlieval=True):
+def create_task_config(args, write=True, data_path=None, itereval=True, mnlievals=True):
     if not data_path is None:
         args.data_path = data_path
 
@@ -37,7 +37,7 @@ def create_task_config(args, write=True, data_path=None, itereval=True, mnlieval
             path=os.path.join(config_dir, f'{config_name}_config.json'),
         )
 
-        if not args.hypothesis:
+        if not args.hypothesis and args.itereval_path != '':
             if itereval:
                 py_io.write_json(
                     data={
@@ -50,18 +50,19 @@ def create_task_config(args, write=True, data_path=None, itereval=True, mnlieval
                     },
                     path=os.path.join(config_dir, f'eval_{config_name}_config.json'),
                 )
-            if mnlieval:
-                py_io.write_json(
-                    data={
-                        "task": "mnli" if args.task_name == '' else args.task_name,
-                        "paths": {
-                            "train": paths["train"],
-                            "val": args.mnlieval_path
+            if mnlievals and args.eval_paths != '':
+                for eval_path, eval_name in zip(args.eval_paths.split(','), args.eval_names.split(',')):
+                    py_io.write_json(
+                        data={
+                            "task": "mnli" if args.task_name == '' else args.task_name,
+                            "paths": {
+                                "train": paths["train"],
+                                "val": eval_path
+                            },
+                            "name": "mnli",
                         },
-                        "name": "mnli",
-                    },
-                    path=os.path.join(config_dir, f'mnlieval_{config_name}_config.json'),
-                )
+                        path=os.path.join(config_dir, f'{eval_name}_{config_name}_config.json'),
+                    )
     else:
         return {
                 "task": "mnli_hyp" if args.hypothesis else "mnli",
@@ -74,10 +75,12 @@ def main():
     parser = argparse.ArgumentParser()
     # Required arguments
     parser.add_argument('--data_path', type=str, required=True)
-    parser.add_argument('--itereval_path', type=str, required=True)
-    parser.add_argument('--mnlieval_path', type=str, required=True)
 
     # Optional
+    parser.add_argument('--itereval_path', type=str, default='')
+    parser.add_argument('--eval_paths', type=str, default='')
+    parser.add_argument('--eval_names', type=str, default='')
+
     parser.add_argument('--hypothesis', action='store_true')
     parser.add_argument('--config_dir', type=str, default='')
     parser.add_argument('--config_name', type=str, default='')

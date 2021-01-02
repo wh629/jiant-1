@@ -59,7 +59,7 @@ def create_sampled_config(args):
                 )
 
             if not args.hypothesis:
-                if not args.itereval_path == '':
+                if args.itereval_path != '':
                     # Itereval
                     py_io.write_json(
                         data={
@@ -73,7 +73,7 @@ def create_sampled_config(args):
                         path=os.path.join(out_dir, f'eval_{config_name}_config.json'),
                     )
 
-                if not args.eval_paths == '':
+                if args.eval_paths != '':
                     assert len(args.eval_paths.split(',')) == len(args.eval_names.split(','))
 
                     for eval_path, eval_name in zip(args.eval_paths.split(','), args.eval_names.split(',')):
