@@ -44,45 +44,51 @@ def create_sampled_config(args):
             train_dir, train_f = os.path.split(train_config["paths"]["train"])
             train_path = os.path.join(train_dir, args.sample, split, train_f)
 
-            # Training
-            py_io.write_json(
-                data={
-                    "task": "mnli_hyp" if args.hypothesis else "mnli",
-                    "paths": {
-                        "train": train_path,
-                        "val": train_config["paths"]["val"]
+            # In-domain Val Data
+            if not args.no_indomain:
+                py_io.write_json(
+                    data={
+                        "task": "mnli_hyp" if args.hypothesis else "mnli",
+                        "paths": {
+                            "train": train_path,
+                            "val": train_config["paths"]["val"]
+                        },
+                        "name": "mnli_hyp" if args.hypothesis else "mnli",
                     },
-                    "name": "mnli_hyp" if args.hypothesis else "mnli",
-                },
-                path=os.path.join(out_dir, f'{config_name}_config.json'),
-            )
+                    path=os.path.join(out_dir, f'{config_name}_config.json'),
+                )
 
             if not args.hypothesis:
-                # Itereval
-                py_io.write_json(
-                    data={
-                        "task": "mnli",
-                        "paths": {
-                            "train": train_path,
-                            "val": args.itereval_path
+                if not args.itereval_path == '':
+                    # Itereval
+                    py_io.write_json(
+                        data={
+                            "task": "mnli",
+                            "paths": {
+                                "train": train_path,
+                                "val": args.itereval_path
+                            },
+                            "name": "mnli",
                         },
-                        "name": "mnli",
-                    },
-                    path=os.path.join(out_dir, f'eval_{config_name}_config.json'),
-                )
+                        path=os.path.join(out_dir, f'eval_{config_name}_config.json'),
+                    )
 
-                # MNLI eval
-                py_io.write_json(
-                    data={
-                        "task": "mnli",
-                        "paths": {
-                            "train": train_path,
-                            "val": args.mnlieval_path
-                        },
-                        "name": "mnli",
-                    },
-                    path=os.path.join(out_dir, f'mnlieval_{config_name}_config.json'),
-                )
+                if not args.eval_paths == '':
+                    assert len(args.eval_paths.split(',')) == len(args.eval_names.split(','))
+
+                    for eval_path, eval_name in zip(args.eval_paths.split(','), args.eval_names.split(',')):
+                        # eval
+                        py_io.write_json(
+                            data={
+                                "task": "mnli",
+                                "paths": {
+                                    "train": train_path,
+                                    "val": eval_path
+                                },
+                                "name": "mnli",
+                            },
+                            path=os.path.join(out_dir, f'{eval_name}_{config_name}_config.json'),
+                        )
 
 
 def main():
@@ -90,10 +96,14 @@ def main():
     # Required arguments
     parser.add_argument('--data_base', type=str, required=True)
     parser.add_argument('--round', type=int, required=True)
-    parser.add_argument('--itereval_path', type=str, required=True)
-    parser.add_argument('--mnlieval_path', type=str, required=True)
 
     # Optional
+    parser.add_argument('--no_indomain', action='store_true')
+    parser.add_argument('--itereval_path', type=str, default='')
+    parser.add_argument('--eval_paths', type=str, default='')
+    parser.add_argument('--eval_names', type=str, default='')
+
+
     parser.add_argument('--sample', type=str, default='cross_eval')
     parser.add_argument('--treatments', type=str, default='baseline,LotS,LitL')
     parser.add_argument('--hypothesis', action='store_true')
