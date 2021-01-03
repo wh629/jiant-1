@@ -4,7 +4,7 @@ import jiant.utils.python.io as py_io
 import argparse
 
 
-def create_task_config(args, write=True, data_path=None, itereval=True, mnlievals=True):
+def create_task_config(args, write=True, data_path=None, itereval=True, mnlieval=True):
     if not data_path is None:
         args.data_path = data_path
 
