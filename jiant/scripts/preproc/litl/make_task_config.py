@@ -50,7 +50,7 @@ def create_task_config(args, write=True, data_path=None, itereval=True, mnlieval
                     },
                     path=os.path.join(config_dir, f'eval_{config_name}_config.json'),
                 )
-            if mnlievals and args.eval_paths != '':
+            if mnlieval and args.eval_paths != '':
                 for eval_path, eval_name in zip(args.eval_paths.split(','), args.eval_names.split(',')):
                     py_io.write_json(
                         data={
